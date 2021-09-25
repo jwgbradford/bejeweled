@@ -16,6 +16,7 @@ class Engine():
     def run(self):
         while True:
             self.print_board()
+            print('')
             self.find_pairs()
             self.find_match_pairs()
             self.print_board()
