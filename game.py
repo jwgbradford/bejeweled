@@ -4,21 +4,22 @@ class Jewel():
     def __init__(self, pos) -> None:
         self.x, self.y = pos
         self.colour = randint(1, 6)
-        self.reset_pairs()
+        self.reset_triples()
 
-    def reset_pairs(self):
-        self.vertical_pair, self.horizontal_pair = [], []
-
+    def reset_triples(self):
+        self.vertical_triple, self.horizontal_triple = [], []
+        
 class Engine():
     def __init__(self) -> None:
-        self.game_board = [[Jewel((i, j)) for i in range(10)] for j in range(10)]
+        self.board_width = 10
+        self.board_height = 10
+        self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
 
     def run(self):
         while True:
             self.print_board()
             print('')
-            self.find_pairs()
-            self.find_match_pairs()
+            self.find_triples()
             self.print_board()
             self.board_drop()
             pause = input()
@@ -32,36 +33,38 @@ class Engine():
                             self.game_board[i - x][j].colour = self.game_board[i - x - 1][j].colour
                     self.game_board[0][j] = Jewel((0, j))
 
-    def find_pairs(self):
+    def find_triples(self):
         for i, row in enumerate(self.game_board):
             for j, jewel in enumerate(row):
-                self.game_board[i][j].reset_pairs()
-                jewel.reset_pairs()
-                if i > 0:
-                    if jewel.colour == self.game_board[i - 1][j].colour:
-                        jewel.vertical_pair.append((i - 1, j))
-                if i < 9:
-                    if jewel.colour == self.game_board[i + 1][j].colour:
-                        jewel.vertical_pair.append((i + 1, j))
-                if j > 0:
-                    if jewel.colour == self.game_board[i][j - 1].colour:
-                        jewel.horizontal_pair.append((i, j - 1))
-                if j < 9:
-                    if jewel.colour == self.game_board[i][j + 1].colour:
-                        jewel.horizontal_pair.append((i, j + 1))
+                self.game_board[i][j].reset_triples()
+                if i > 0 and i < self.board_width - 1:
+                    if (
+                        jewel.colour == self.game_board[i - 1][j].colour and 
+                        jewel.colour == self.game_board[i + 1][j].colour
+                        ):
+                        jewel.vertical_triple.append((i - 1, j))
+                        jewel.vertical_triple.append((i + 1, j))
+                if j > 0 and j < self.board_height - 1:
+                    if (
+                        jewel.colour == self.game_board[i][j - 1].colour and
+                        jewel.colour == self.game_board[i][j + 1].colour
+                        ):
+                        jewel.horizontal_triple.append((i, j - 1))
+                        jewel.horizontal_triple.append((i, j + 1))
+        self.clear_matched()
 
-    def find_match_pairs(self):
+    def clear_matched(self):
         for i, row in enumerate(self.game_board):
             for j, jewel in enumerate(row):
-                if len(jewel.horizontal_pair) > 1:
+                if len(jewel.horizontal_triple) > 0:
                     self.game_board[i][j].colour = 0
-                    for pos in jewel.horizontal_pair:
-                        x, y = pos
+                    for cell in jewel.horizontal_triple:
+                        x, y = cell
                         self.game_board[x][y].colour = 0
-                if len(jewel.vertical_pair) > 1:
+                if len(jewel.vertical_triple) > 0:
                     self.game_board[i][j].colour = 0
-                    for pos in jewel.vertical_pair:
-                        x, y = pos
+                    for cell in jewel.vertical_triple:
+                        x, y = cell
                         self.game_board[x][y].colour = 0
 
     def print_board(self):
