@@ -12,9 +12,12 @@ class Jewel():
     def __init__(self, pos) -> None:
         self.x, self.y = pos
         self.colour = randint(1, len(COLOURS) - 1)
+        self.update_jewel()
+        self.reset_triples()
+
+    def update_jewel (self):
         self.make_image()
         self.get_rect()
-        self.reset_triples()
 
     def reset_triples(self):
         self.vertical_triple, self.horizontal_triple = [], []
@@ -56,9 +59,9 @@ class Engine():
                     if i > 0:
                         for x in range(i):
                             self.game_board[i - x][j].colour = self.game_board[i - x - 1][j].colour
-                            self.game_board[i - x][j].make_image()
-                            self.game_board[i - x][j].get_rect()
+                            self.game_board[i - x][j].update_jewel()
                     self.game_board[0][j].colour = randint(1, len(COLOURS) - 1)
+                    self.game_board[0][j].update_jewel()
 
     def find_triples(self):
         for i, row in enumerate(self.game_board):
