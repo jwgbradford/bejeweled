@@ -43,14 +43,26 @@ class Engine():
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
 
     def run(self):
+        point_a, point_b = (-1, -1), (-1, -1)
         while True:
-            self.print_board()
-            print('')
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    print(pygame.mouse.get_pos())
+                    if point_a == (-1, -1):
+                        point_a = pygame.mouse.get_pos()
+                        for row in self.game_board:
+                            for jewl in row:
+                                if jewl.my_rect.collidepoint(point_a):
+                                    print('pos:', '(',jewl.x, jewl.y,')')
+                    else:
+                        point_b = pygame.mouse.get_pos()
+                        point_a = (-1, -1)
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    SystemExit
             self.find_triples()
-            self.print_board()
             self.draw_board()
             self.board_drop()
-            pause = input()
 
     def board_drop(self):
         for i, row in enumerate(self.game_board):
