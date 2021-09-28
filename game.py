@@ -44,25 +44,26 @@ class Engine():
 
     def run(self):
         point_a, point_b = (-1, -1), (-1, -1)
+        self.draw_board()
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    print(pygame.mouse.get_pos())
                     if point_a == (-1, -1):
                         point_a = pygame.mouse.get_pos()
-                        for row in self.game_board:
-                            for jewl in row:
-                                if jewl.my_rect.collidepoint(point_a):
-                                    print('pos:', '(',jewl.x, jewl.y,')')
+                        ax,ay = point_a[1]//40, point_a[0]//40
+                        acolour = self.game_board[ax][ay].colour
                     else:
                         point_b = pygame.mouse.get_pos()
+                        bx,by = point_b[1]//40, point_b[0]//40
+                        print(bx,by)
+                        self.game_board[ax][ay].colour = self.game_board[bx][by].colour
+                        self.game_board[bx][by].colour = acolour
+                        self.game_board[bx][by].make_image()
+                        self.game_board[ax][ay].make_image()
+                        self.draw_board()
                         point_a = (-1, -1)
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    SystemExit
-            self.find_triples()
-            self.draw_board()
-            self.board_drop()
 
     def board_drop(self):
         for i, row in enumerate(self.game_board):
