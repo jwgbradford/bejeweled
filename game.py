@@ -55,12 +55,12 @@ class Engine():
                     else:
                         point_b = pygame.mouse.get_pos()
                         bx,by = point_b[1]//40, point_b[0]//40
-                        print(bx,by)
-                        self.game_board[ax][ay].colour = self.game_board[bx][by].colour
-                        self.game_board[bx][by].colour = acolour
-                        self.game_board[bx][by].make_image()
-                        self.game_board[ax][ay].make_image()
-                        self.draw_board()
+                        if (abs(bx - ax) == 1 and abs(ay - by) == 0) or (abs(ay - by) == 1 and abs(ax - bx) == 0):
+                            self.game_board[ax][ay].colour = self.game_board[bx][by].colour
+                            self.game_board[bx][by].colour = acolour
+                            self.game_board[bx][by].make_image()
+                            self.game_board[ax][ay].make_image()
+                            self.draw_board()
                         point_a = (-1, -1)
                 if event.type == pygame.QUIT:
                     pygame.quit()
