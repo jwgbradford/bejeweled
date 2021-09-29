@@ -53,15 +53,18 @@ class Engine():
             pause = input()
 
     def board_drop(self):
-        for i, row in enumerate(self.game_board):
-            for j, jewel in enumerate(row):
-                if jewel.colour == 0:
-                    if i > 0:
-                        for x in range(i):
-                            self.game_board[i - x][j].colour = self.game_board[i - x - 1][j].colour
-                            self.game_board[i - x][j].update_jewel()
-                    self.game_board[0][j].colour = randint(1, len(COLOURS) - 1)
-                    self.game_board[0][j].update_jewel()
+        # to drop the board, we want to start at the bottom row, and work up
+        for i in range(self.board_height - 1, -1, -1):
+            row_drop = True
+            while i > 0 and row_drop: # we don't do the top row
+                for j in range(self.board_width):
+                    if self.game_board[i][j].colour == 0: # editing this line
+                        if i > 0:
+                            for x in range(i):
+                                self.game_board[i - x][j].colour = self.game_board[i - x - 1][j].colour
+                                self.game_board[i - x][j].update_jewel()
+                        self.game_board[0][j].colour = randint(1, len(COLOURS) - 1)
+                        self.game_board[0][j].update_jewel()
 
     def find_triples(self):
         for i, row in enumerate(self.game_board):
