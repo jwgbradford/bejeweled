@@ -2,10 +2,10 @@ from random import randint
 import pygame
 
 COLOURS = [ (0, 0, 0),
-    (255, 0, 0), (255, 64, 0), (255, 128, 0), (255, 191, 0), 
-    (255, 255, 0), (191, 255, 0), (128, 255, 0), (64, 255, 0), 
-    (0, 255, 0), (0, 255, 64), (0, 255, 128), (0, 255, 191),
-    (0, 255, 255), (0, 191, 255), (0, 128, 255), (0, 64, 255), (0, 0, 255)
+    (255, 0, 0), (255, 191, 0), 
+    (255, 255, 0), (64, 255, 0), 
+    (0, 255, 0), (0, 255, 191),
+    (0, 255, 255), (0, 0, 255)
     ]
 
 class Jewel():
@@ -41,9 +41,32 @@ class Engine():
         self.game_window = pygame.display.set_mode((self.board_width * 40, self.board_height * 40))
         pygame.display.set_caption("DigiJewels")
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
-
+    def check_row(self,ax,ay,bx,by, acolour):
+            print('check if valid move')
+            direction_x = abs(ax-bx)
+            if direction_x:
+                if self.game_board[bx-1][by].colour == acolour:
+                    if self.game_board[bx-2][by].colour == acolour:
+                        return True
+                    elif self.game_board[bx+1][by].colour == acolour:
+                        return True
+                elif self.game_board[bx+1][by].colour == acolour:
+                    if self.game_board[bx+2][by].colour == acolour:
+                        return True
+                return False
+            else:
+                if self.game_board[bx][by-1].colour == acolour:
+                    if self.game_board[bx][by-2].colour == acolour:
+                        return True
+                    elif self.game_board[bx][bx+1].colour == acolour:
+                        return True
+                elif self.game_board[bx][bx+1].colour == acolour:
+                    if self.game_board[bx][bx+2].colour == acolour:
+                        return True
+                return False
     def run(self):
         point_a, point_b = (-1, -1), (-1, -1)
+        self.board_drop()
         self.draw_board()
         while True:
             for event in pygame.event.get():
@@ -56,11 +79,13 @@ class Engine():
                         point_b = pygame.mouse.get_pos()
                         bx,by = point_b[1]//40, point_b[0]//40
                         if (abs(bx - ax) == 1 and abs(ay - by) == 0) or (abs(ay - by) == 1 and abs(ax - bx) == 0):
-                            self.game_board[ax][ay].colour = self.game_board[bx][by].colour
-                            self.game_board[bx][by].colour = acolour
-                            self.game_board[bx][by].make_image()
-                            self.game_board[ax][ay].make_image()
-                            self.draw_board()
+                            if self.check_row(ax,ay,bx,by, acolour):
+                                self.game_board[ax][ay].colour = self.game_board[bx][by].colour
+                                self.game_board[bx][by].colour = acolour
+                                self.game_board[bx][by].make_image()
+                                self.game_board[ax][ay].make_image()
+                                self.draw_board()
+                                self.board_drop()
                         point_a = (-1, -1)
                 if event.type == pygame.QUIT:
                     pygame.quit()
