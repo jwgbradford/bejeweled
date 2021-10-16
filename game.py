@@ -32,6 +32,11 @@ class Jewel():
         jewel_center = (20 + (self.x * 40), 20 + (self.y * 40))
         jewel_rect = self.my_image.get_rect(center = jewel_center)
         self.my_rect =  jewel_rect
+    
+    def drop_rect(self, dy):
+        jewel_center = (20 + (self.x * 40), 20 + ((self.y * 40) + dy))
+        jewel_rect = self.my_image.get_rect(center = jewel_center)
+        self.my_rect =  jewel_rect
 
 class Engine():
     def __init__(self) -> None:
@@ -52,19 +57,55 @@ class Engine():
             self.board_drop()
             pause = input()
 
+    def column_drop(self, i):
+        columns_to_drop = {}
+        # test if any columns contain black jewels
+        for j in range(self.board_width):
+            if self.game_board[i][j].colour == 0:
+                row_drop_count = 0
+                if i == 0:
+                    self.game_board[i][j].colour = randint(1, len(COLOURS) - 1) # make a new jewel
+                    self.game_board[i][j].make_image()
+                else:
+                    for x in range(i):
+                        if self.game_board[i - x][j].colour == 0: # if the jewel above ours is also black, we keep going
+                            row_drop_count += 1
+                        else:
+                            break
+                columns_to_drop[j] = row_drop_count
+        return columns_to_drop
+
+    def jewel_drop(self, i, columns_to_drop):
+        for dy in range(40):
+            for column in columns_to_drop:
+                rows_to_drop = columns_to_drop[column]
+                self.game_board[i - rows_to_drop][column].drop_rect(dy)
+            self.draw_board()
+            pygame.time.Clock().tick(20)
+
     def board_drop(self):
         # to drop the board, we want to start at the bottom row, and work up
         for i in range(self.board_height - 1, -1, -1):
-            row_drop = True
-            while i > 0 and row_drop: # we don't do the top row
-                for j in range(self.board_width):
-                    if self.game_board[i][j].colour == 0: # editing this line
-                        if i > 0:
-                            for x in range(i):
-                                self.game_board[i - x][j].colour = self.game_board[i - x - 1][j].colour
-                                self.game_board[i - x][j].update_jewel()
-                        self.game_board[0][j].colour = randint(1, len(COLOURS) - 1)
-                        self.game_board[0][j].update_jewel()
+            columns_to_drop = self.column_drop(i)
+            #drop jewels by one row
+            for _ in range(len(columns_to_drop)):
+                print(columns_to_drop)
+                self.jewel_drop(i, columns_to_drop)
+                # and swap colours
+                del_columns = {}
+                for column in columns_to_drop:
+                    rows_to_drop = columns_to_drop[column]
+                    self.game_board[i - rows_to_drop + 1][column].colour = self.game_board[i - rows_to_drop][column].colour
+                    self.game_board[i - rows_to_drop + 1][column].make_image()
+                    self.game_board[i - rows_to_drop][column].colour = 0
+                    self.game_board[i - rows_to_drop][column].make_image()
+                    #columns_to_drop[column] -= 1
+                    if columns_to_drop[column] == 0:
+                        del_columns[column] = 0
+                for column in del_columns:
+                    columns_to_drop.pop(column)
+                if len(columns_to_drop) == 0:
+                    break
 
     def find_triples(self):
         for i, row in enumerate(self.game_board):
@@ -91,14 +132,18 @@ class Engine():
             for j, jewel in enumerate(row):
                 if len(jewel.horizontal_triple) > 0:
                     self.game_board[i][j].colour = 0
+                    self.game_board[i][j].make_image()
                     for cell in jewel.horizontal_triple:
                         x, y = cell
                         self.game_board[x][y].colour = 0
+                        self.game_board[x][y].make_image()
                 if len(jewel.vertical_triple) > 0:
                     self.game_board[i][j].colour = 0
+                    self.game_board[i][j].make_image()
                     for cell in jewel.vertical_triple:
                         x, y = cell
                         self.game_board[x][y].colour = 0
+                        self.game_board[x][y].make_image()
 
     def draw_board(self):
         self.game_window.fill(COLOURS[0])
