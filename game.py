@@ -50,6 +50,12 @@ class Engine():
         self.game_window = pygame.display.set_mode((self.board_width * 40, self.board_height * 40))
         pygame.display.set_caption("DigiJewels")
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
+        self.first_pos = self.second_pos = (-1 ,-1)
+    
+    def pos_to_coord(self):
+        pos = pygame.mouse.get_pos()
+        row, col = pos[1]//40, pos[0]//40
+        return (row, col)
 
     def run(self):
         while True:
@@ -60,6 +66,18 @@ class Engine():
             self.draw_board()
             self.board_drop()
             #pause = input()
+            pygame.event.get()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.first_pos == (-1, -1):
+                        self.first_pos = self.pos_to_coord()
+                        print('first', self.first_pos)
+                    else:
+                        self.second_pos = self.pos_to_coord()
+                        self.first_pos = (-1, -1)
+                        print('second', self.second_pos)
+                if event.type == pygame.QUIT:
+                    pygame.quit()
 
     def column_drop(self, i):
         columns_to_drop = {}
