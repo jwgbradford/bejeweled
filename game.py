@@ -32,6 +32,7 @@ class Jewel():
         jewel_center = (20 + (self.x * 40), 20 + (self.y * 40))
         jewel_rect = self.my_image.get_rect(center = jewel_center)
         self.my_rect =  jewel_rect
+
     def reset_image(self):
         self.make_image()
         self.get_rect()
@@ -52,13 +53,13 @@ class Engine():
 
     def run(self):
         while True:
-            self.print_board()
-            print('')
+            #self.print_board()
+            #print('')
             self.find_triples()
-            self.print_board()
+            #self.print_board()
             self.draw_board()
             self.board_drop()
-            pause = input()
+            #pause = input()
 
     def column_drop(self, i):
         columns_to_drop = {}
@@ -68,14 +69,17 @@ class Engine():
                 row_drop_count = 0
                 if i == 0:
                     self.game_board[i][j].colour = randint(1, len(COLOURS) - 1) # make a new jewel
-                    self.game_board[i][j].make_image()
+                    self.game_board[i][j].reset_image()
                 else:
                     for x in range(i):
                         if self.game_board[i - x][j].colour == 0: # if the jewel above ours is also black, we keep going
                             row_drop_count += 1
+                        elif self.game_board[0][j].colour == 0:
+                            self.game_board[0][j].colour = randint(1, len(COLOURS) - 1) # make a new jewel
+                            self.game_board[0][j].reset_image()
                         else:
                             break
-                columns_to_drop[j] = row_drop_count
+                    columns_to_drop[j] = row_drop_count
         return columns_to_drop
 
     def jewel_drop(self, i, columns_to_drop):
@@ -84,7 +88,7 @@ class Engine():
                 rows_to_drop = columns_to_drop[column]
                 self.game_board[i - rows_to_drop][column].drop_rect(dy)
             self.draw_board()
-            pygame.time.Clock().tick(20)
+            pygame.time.Clock().tick(60)
 
     def drop_rows(self, i, row_drop, columns_to_drop):
         for loop_number in range(row_drop):
