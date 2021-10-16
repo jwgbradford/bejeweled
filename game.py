@@ -92,7 +92,6 @@ class Engine():
 
     def drop_rows(self, i, row_drop, columns_to_drop):
         for loop_number in range(row_drop):
-            print(loop_number, columns_to_drop)
             self.jewel_drop(i, columns_to_drop)
             for column in columns_to_drop:
                 rows_to_drop = columns_to_drop[column]
