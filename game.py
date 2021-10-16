@@ -32,7 +32,10 @@ class Jewel():
         jewel_center = (20 + (self.x * 40), 20 + (self.y * 40))
         jewel_rect = self.my_image.get_rect(center = jewel_center)
         self.my_rect =  jewel_rect
-    
+    def reset_image(self):
+        self.make_image()
+        self.get_rect()
+
     def drop_rect(self, dy):
         jewel_center = (20 + (self.x * 40), 20 + ((self.y * 40) + dy))
         jewel_rect = self.my_image.get_rect(center = jewel_center)
@@ -83,29 +86,29 @@ class Engine():
             self.draw_board()
             pygame.time.Clock().tick(20)
 
+    def drop_rows(self, i, row_drop, columns_to_drop):
+        for loop_number in range(row_drop):
+            print(loop_number, columns_to_drop)
+            self.jewel_drop(i, columns_to_drop)
+            for column in columns_to_drop:
+                rows_to_drop = columns_to_drop[column]
+                self.game_board[i - rows_to_drop + 1][column].colour = self.game_board[i - rows_to_drop][column].colour
+                self.game_board[i - rows_to_drop + 1][column].reset_image()
+                self.game_board[i - rows_to_drop][column].colour = 0
+                self.game_board[i - rows_to_drop][column].reset_image()
+                if columns_to_drop[column] > 0:
+                    columns_to_drop[column] -= 1
+
     def board_drop(self):
         # to drop the board, we want to start at the bottom row, and work up
         for i in range(self.board_height - 1, -1, -1):
             columns_to_drop = self.column_drop(i)
-            #drop jewels by one row
-            for _ in range(len(columns_to_drop)):
-                print(columns_to_drop)
-                self.jewel_drop(i, columns_to_drop)
-                # and swap colours
-                del_columns = {}
-                for column in columns_to_drop:
-                    rows_to_drop = columns_to_drop[column]
-                    self.game_board[i - rows_to_drop + 1][column].colour = self.game_board[i - rows_to_drop][column].colour
-                    self.game_board[i - rows_to_drop + 1][column].make_image()
-                    self.game_board[i - rows_to_drop][column].colour = 0
-                    self.game_board[i - rows_to_drop][column].make_image()
-                    #columns_to_drop[column] -= 1
-                    if columns_to_drop[column] == 0:
-                        del_columns[column] = 0
-                for column in del_columns:
-                    columns_to_drop.pop(column)
-                if len(columns_to_drop) == 0:
-                    break
+            if len(columns_to_drop) > 0:
+                row_drop = 0
+                for drop in columns_to_drop:
+                    if columns_to_drop[drop] > row_drop:
+                        row_drop = columns_to_drop[drop]
+                self.drop_rows(i, row_drop, columns_to_drop)
 
     def find_triples(self):
         for i, row in enumerate(self.game_board):
