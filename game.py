@@ -66,7 +66,6 @@ class Engine():
             self.draw_board()
             self.board_drop()
             #pause = input()
-            pygame.event.get()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.first_pos == (-1, -1):
@@ -106,6 +105,9 @@ class Engine():
                 rows_to_drop = columns_to_drop[column]
                 self.game_board[i - rows_to_drop][column].drop_rect(dy)
             self.draw_board()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
             pygame.time.Clock().tick(60)
 
     def drop_rows(self, i, row_drop, columns_to_drop):
