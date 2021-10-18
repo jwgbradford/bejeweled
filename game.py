@@ -58,6 +58,7 @@ class Engine():
         pygame.display.set_caption("DigiJewels")
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
         self.first_pos = self.second_pos = (-1 ,-1)
+        self.score = 0
     
     def pos_to_coord(self):
         pos = pygame.mouse.get_pos()
@@ -80,7 +81,6 @@ class Engine():
                     else:
                         self.second_pos = self.pos_to_coord()
                         self.jewel_swap()
-                        self.first_pos = (-1, -1)
                 if event.type == pygame.QUIT:
                     pygame.quit()
 
@@ -119,7 +119,10 @@ class Engine():
     def jewel_swap(self):
         dy = self.first_pos[0] - self.second_pos[0]
         dx = self.first_pos[1] - self.second_pos[1]
-        if (abs(dx) == 1) != (abs(dy) == 1) :
+        if (
+            ((abs(dx) == 1) and dy == 0 ) != 
+            (dx == 0 and (abs(dy) == 1) )
+            ):
             for step in range(40):
                 self.game_board[self.first_pos[0]][self.first_pos[1]].slide_rect(step, -dx, -dy)
                 self.game_board[self.second_pos[0]][self.second_pos[1]].slide_rect(step, dx, dy)
@@ -128,6 +131,11 @@ class Engine():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                 pygame.time.Clock().tick(60)
+            first_colour = self.game_board[self.first_pos[0]][self.first_pos[1]].colour
+            self.game_board[self.first_pos[0]][self.first_pos[1]].colour = self.game_board[self.second_pos[0]][self.second_pos[1]].colour
+            self.game_board[self.first_pos[0]][self.first_pos[1]].reset_image()
+            self.game_board[self.second_pos[0]][self.second_pos[1]].colour = first_colour
+            self.game_board[self.second_pos[0]][self.second_pos[1]].reset_image()
 
     def drop_rows(self, i, row_drop, columns_to_drop):
         for loop_number in range(row_drop):
@@ -153,6 +161,7 @@ class Engine():
                 self.drop_rows(i, row_drop, columns_to_drop)
 
     def find_triples(self):
+        no_triples = True
         for i, row in enumerate(self.game_board):
             for j, jewel in enumerate(row):
                 self.game_board[i][j].reset_triples()
@@ -163,6 +172,9 @@ class Engine():
                         ):
                         jewel.vertical_triple.append((i - 1, j))
                         jewel.vertical_triple.append((i + 1, j))
+                        self.score += 1
+                        no_triples = False
+                        print(self.score)
                 if j > 0 and j < self.board_height - 1:
                     if (
                         jewel.colour == self.game_board[i][j - 1].colour and
@@ -170,7 +182,21 @@ class Engine():
                         ):
                         jewel.horizontal_triple.append((i, j - 1))
                         jewel.horizontal_triple.append((i, j + 1))
+                        self.score += 1
+                        no_triples = False
+                        print(self.score)
+        if no_triples and self.first_pos != (-1, -1) and self.second_pos != (-1, -1):
+            self.undo_move()
+        elif not no_triples:
+            self.first_pos = self.second_pos = (-1 ,-1)
         self.clear_matched()
+
+    def undo_move(self):
+        temp_pos = self.first_pos
+        self.first_pos = self.second_pos
+        self.second_pos = temp_pos
+        self.jewel_swap()
+        self.first_pos = self.second_pos = (-1, -1)
 
     def clear_matched(self):
         for i, row in enumerate(self.game_board):
