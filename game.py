@@ -42,6 +42,13 @@ class Jewel():
         jewel_rect = self.my_image.get_rect(center = jewel_center)
         self.my_rect =  jewel_rect
 
+    def slide_rect(self, step, dirx, diry):
+        dx = step * dirx
+        dy = step * diry
+        jewel_center = (20 + (self.x * 40) + dx, 20 + ((self.y * 40) + dy))
+        jewel_rect = self.my_image.get_rect(center = jewel_center)
+        self.my_rect =  jewel_rect
+
 class Engine():
     def __init__(self) -> None:
         self.board_width = 10
@@ -70,11 +77,10 @@ class Engine():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.first_pos == (-1, -1):
                         self.first_pos = self.pos_to_coord()
-                        print('first', self.first_pos)
                     else:
                         self.second_pos = self.pos_to_coord()
+                        self.jewel_swap()
                         self.first_pos = (-1, -1)
-                        print('second', self.second_pos)
                 if event.type == pygame.QUIT:
                     pygame.quit()
 
@@ -109,6 +115,19 @@ class Engine():
                 if event.type == pygame.QUIT:
                     pygame.quit()
             pygame.time.Clock().tick(60)
+
+    def jewel_swap(self):
+        dy = self.first_pos[0] - self.second_pos[0]
+        dx = self.first_pos[1] - self.second_pos[1]
+        if (abs(dx) == 1) != (abs(dy) == 1) :
+            for step in range(40):
+                self.game_board[self.first_pos[0]][self.first_pos[1]].slide_rect(step, -dx, -dy)
+                self.game_board[self.second_pos[0]][self.second_pos[1]].slide_rect(step, dx, dy)
+                self.draw_board()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                pygame.time.Clock().tick(60)
 
     def drop_rows(self, i, row_drop, columns_to_drop):
         for loop_number in range(row_drop):
