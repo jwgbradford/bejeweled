@@ -87,9 +87,11 @@ class Engine():
                 for cell in jewel.horizontal_triple:
                     x, y = cell
                     self.game_board[x][y].colour = 0
+                    self.game_board[x][y].update_jewel()
                 for cell in jewel.vertical_triple:
                     x, y = cell
                     self.game_board[x][y].colour = 0
+                    self.game_board[x][y].update_jewel()
 
     def draw_board(self):
         self.game_window.fill(COLOURS[0])
@@ -97,6 +99,14 @@ class Engine():
             for jewel in row:
                 self.game_window.blit(jewel.my_image, jewel.my_rect)
         pygame.display.update()
+
+    def board_drop(self):
+        for i in range(self.board_height - 1, -1, -1):
+            columns_to_drop = self.column_drop(i)
+            if len(columns_to_drop) > 0:
+                for drop in columns_to_drop:
+                    row_drop = columns_to_drop[drop]
+                    self.drop_rows(i, row_drop, columns_to_drop)
 
 if __name__ == '__main__':
     my_game = Engine()

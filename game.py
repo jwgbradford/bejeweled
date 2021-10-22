@@ -136,11 +136,9 @@ class Engine():
         for i in range(self.board_height - 1, -1, -1):
             columns_to_drop = self.column_drop(i)
             if len(columns_to_drop) > 0:
-                row_drop = 0
                 for drop in columns_to_drop:
-                    if columns_to_drop[drop] > row_drop:
-                        row_drop = columns_to_drop[drop]
-                self.drop_rows(i, row_drop, columns_to_drop)
+                    row_drop = columns_to_drop[drop]
+                    self.drop_rows(i, row_drop, columns_to_drop)
 
     def jewel_swap(self):
         dy = self.first_pos[0] - self.second_pos[0]
