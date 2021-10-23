@@ -2,10 +2,16 @@ from random import randint
 import pygame
 
 COLOURS = [ (0, 0, 0),
-    (255, 0, 0), (255, 64, 0), (255, 128, 0), (255, 191, 0), 
-    (255, 255, 0), (191, 255, 0), (128, 255, 0), (64, 255, 0),
-    (0, 255, 0), (0, 255, 64), (0, 255, 128), (0, 255, 191),
-    (0, 255, 255), (0, 191, 255), (0, 128, 255), (0, 64, 255), (0, 0, 255)
+    (255, 0, 0), (0, 255, 0), (0, 0, 255),
+    (255, 255, 0), (0, 255, 255), (255, 0, 255),
+    ]
+
+holding = [
+    (0, 191, 255), (0, 128, 255), 
+    (0, 64, 255), (191, 255, 0), 
+    (255, 191, 0), 
+    (0, 255, 64), (0, 255, 128), (0, 255, 191),
+    (128, 255, 0), (64, 255, 0), (255, 64, 0), (255, 128, 0), 
     ]
 
 TEST_BOARD = [
@@ -72,7 +78,7 @@ class Engine():
         self.font = pygame.font.SysFont('arial', 40)
         self.score_label = self.font.render("Score", True, (175, 175, 175))
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
-        self.setup_test()
+        #self.setup_test()
         self.first_pos = self.second_pos = (-1 ,-1)
         self.score = 0
 
@@ -126,7 +132,11 @@ class Engine():
             for column in columns_to_drop:
                 rows_to_drop = columns_to_drop[column]
                 if rows_to_drop > 0:
-                    self.game_board[i - rows_to_drop][column].drop_rect(dy)
+                    if self.game_board[0][column].colour == 0:
+                        self.game_board[0][column].colour = randint(1, len(COLOURS) - 1) # make a new jewel
+                        self.game_board[0][column].reset_image()
+                    for dx in range(i - rows_to_drop + 1):
+                        self.game_board[i - rows_to_drop - dx][column].drop_rect(dy)
             self.draw_board()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -143,10 +153,11 @@ class Engine():
             for column in columns_to_drop:
                 if columns_to_drop[column] > 0:
                     rows_to_drop = columns_to_drop[column]
-                    self.game_board[i - rows_to_drop + 1][column].colour = self.game_board[i - rows_to_drop][column].colour
-                    self.game_board[i - rows_to_drop + 1][column].reset_image()
-                    self.game_board[i - rows_to_drop][column].colour = 0
-                    self.game_board[i - rows_to_drop][column].reset_image()
+                    for dx in range(i - rows_to_drop + 1):
+                        self.game_board[i - rows_to_drop + 1 - dx][column].colour = self.game_board[i - rows_to_drop - dx][column].colour
+                        self.game_board[i - rows_to_drop + 1 - dx][column].reset_image()
+                        self.game_board[i - rows_to_drop - dx][column].colour = 0
+                        self.game_board[i - rows_to_drop - dx][column].reset_image()
                     columns_to_drop[column] -= 1
 
     def board_drop(self):
