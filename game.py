@@ -3,13 +3,11 @@ import pygame
 
 COLOURS = [ (0, 0, 0),
     (255, 0, 0), (255, 64, 0), (255, 128, 0), (255, 191, 0), 
-    (255, 255, 0), (191, 255, 0), (128, 255, 0), (64, 255, 0)]
-'''
-    ,
+    (255, 255, 0), (191, 255, 0), (128, 255, 0), (64, 255, 0),
     (0, 255, 0), (0, 255, 64), (0, 255, 128), (0, 255, 191),
     (0, 255, 255), (0, 191, 255), (0, 128, 255), (0, 64, 255), (0, 0, 255)
     ]
-'''
+
 TEST_BOARD = [
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     [2, 3, 4, 5, 6, 7, 8, 9, 11, 12],
@@ -74,7 +72,7 @@ class Engine():
         self.font = pygame.font.SysFont('arial', 40)
         self.score_label = self.font.render("Score", True, (175, 175, 175))
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
-        #self.setup_test()
+        self.setup_test()
         self.first_pos = self.second_pos = (-1 ,-1)
         self.score = 0
 
@@ -91,13 +89,9 @@ class Engine():
 
     def run(self):
         while True:
-            #self.print_board()
-            #print('')
             self.find_triples()
-            #self.print_board()
             self.draw_board()
             self.board_drop()
-            #pause = input()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.first_pos == (-1, -1):
