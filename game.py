@@ -72,7 +72,7 @@ class Engine():
         self.font = pygame.font.SysFont('arial', 40)
         self.score_label = self.font.render("Score", True, (175, 175, 175))
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
-        self.setup_test()
+        #self.setup_test()
         self.first_pos = self.second_pos = (-1 ,-1)
         self.score = 0
 
@@ -142,7 +142,6 @@ class Engine():
         for column in columns_to_drop:
             if columns_to_drop[column] > max_drop:
                 max_drop = columns_to_drop[column]
-        print(columns_to_drop, max_drop)
         for _ in range(max_drop):
             self.jewel_drop(i, columns_to_drop)
             for column in columns_to_drop:
