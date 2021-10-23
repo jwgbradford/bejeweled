@@ -8,6 +8,19 @@ COLOURS = [ (0, 0, 0),
     (0, 255, 255), (0, 191, 255), (0, 128, 255), (0, 64, 255), (0, 0, 255)
     ]
 
+TEST_BOARD = [
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [2, 3, 4, 5, 6, 7, 8, 9, 11, 12],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [2, 3, 4, 5, 6, 7, 8, 9, 11, 12],
+    [2, 3, 4, 5, 6, 7, 8, 9, 11, 12],
+    [3, 4, 5, 6, 7, 8, 9, 11, 12, 13],
+    [2, 4, 3, 6, 7, 8, 9, 11, 12, 13],
+    [4, 4, 4, 5, 6, 7, 8, 9, 10, 11],
+    [3, 4, 5, 6, 7, 8, 9, 11, 12, 13],
+    [3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
+]
+
 class Jewel():
     def __init__(self, pos) -> None:
         self.x, self.y = pos
@@ -59,9 +72,16 @@ class Engine():
         self.font = pygame.font.SysFont('arial', 40)
         self.score_label = self.font.render("Score", True, (175, 175, 175))
         self.game_board = [[Jewel((i, j)) for i in range(self.board_width)] for j in range(self.board_height)]
+        self.setup_test()
         self.first_pos = self.second_pos = (-1 ,-1)
         self.score = 0
-    
+
+    def setup_test(self):
+        for i, row in enumerate(TEST_BOARD):
+            for j, colour in enumerate(row):
+                self.game_board[i][j].colour = colour
+                self.game_board[i][j].update_jewel()
+
     def pos_to_coord(self):
         pos = pygame.mouse.get_pos()
         row, col = pos[1]//40, pos[0]//40
@@ -97,13 +117,11 @@ class Engine():
                     self.game_board[i][j].reset_image()
                 else:
                     for x in range(i):
-                        if self.game_board[i - x][j].colour == 0: # if the jewel above ours is also black, we keep going
-                            row_drop_count += 1
-                        elif self.game_board[0][j].colour == 0:
+                        if self.game_board[0][j].colour == 0:
                             self.game_board[0][j].colour = randint(1, len(COLOURS) - 1) # make a new jewel
                             self.game_board[0][j].reset_image()
-                        else:
-                            break
+                        if self.game_board[i - x][j].colour == 0: # if the jewel above ours is also black, we keep going
+                            row_drop_count += 1
                     columns_to_drop[j] = row_drop_count
         return columns_to_drop
 
@@ -119,16 +137,21 @@ class Engine():
                     pygame.quit()
             pygame.time.Clock().tick(60)
 
-    def drop_rows(self, i, row_drop, columns_to_drop):
-        for loop_number in range(row_drop):
+    def drop_rows(self, i, columns_to_drop):
+        max_drop = 1
+        for column in columns_to_drop:
+            if columns_to_drop[column] > max_drop:
+                max_drop = columns_to_drop[column]
+        print(columns_to_drop, max_drop)
+        for _ in range(max_drop):
             self.jewel_drop(i, columns_to_drop)
             for column in columns_to_drop:
-                rows_to_drop = columns_to_drop[column]
-                self.game_board[i - rows_to_drop + 1][column].colour = self.game_board[i - rows_to_drop][column].colour
-                self.game_board[i - rows_to_drop + 1][column].reset_image()
-                self.game_board[i - rows_to_drop][column].colour = 0
-                self.game_board[i - rows_to_drop][column].reset_image()
                 if columns_to_drop[column] > 0:
+                    rows_to_drop = columns_to_drop[column]
+                    self.game_board[i - rows_to_drop + 1][column].colour = self.game_board[i - rows_to_drop][column].colour
+                    self.game_board[i - rows_to_drop + 1][column].reset_image()
+                    self.game_board[i - rows_to_drop][column].colour = 0
+                    self.game_board[i - rows_to_drop][column].reset_image()
                     columns_to_drop[column] -= 1
 
     def board_drop(self):
@@ -136,9 +159,7 @@ class Engine():
         for i in range(self.board_height - 1, -1, -1):
             columns_to_drop = self.column_drop(i)
             if len(columns_to_drop) > 0:
-                for drop in columns_to_drop:
-                    row_drop = columns_to_drop[drop]
-                    self.drop_rows(i, row_drop, columns_to_drop)
+                self.drop_rows(i, columns_to_drop)
 
     def jewel_swap(self):
         dy = self.first_pos[0] - self.second_pos[0]
