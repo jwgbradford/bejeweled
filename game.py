@@ -46,7 +46,13 @@ class Jewel():
         image.set_colorkey(COLOURS[0])  # Black colors will not be blit.
         pygame.draw.circle(image, COLOURS[self.colour], (20, 20), 20)
         self.my_image =  image
-    
+
+    def fade_image(self, rgb):
+        image = pygame.Surface((40, 40))
+        image.set_colorkey(COLOURS[0])  # Black colors will not be blit.
+        pygame.draw.circle(image, rgb, (20, 20), 20)
+        self.my_image =  image
+
     def get_rect(self):
         jewel_center = (20 + (self.x * 40), 20 + (self.y * 40))
         jewel_rect = self.my_image.get_rect(center = jewel_center)
@@ -198,6 +204,7 @@ class Engine():
                         jewel.colour == self.game_board[i - 1][j].colour and 
                         jewel.colour == self.game_board[i + 1][j].colour
                         ):
+                        jewel.vertical_triple.append((i, j))
                         jewel.vertical_triple.append((i - 1, j))
                         jewel.vertical_triple.append((i + 1, j))
                         self.score += 1
@@ -207,6 +214,7 @@ class Engine():
                         jewel.colour == self.game_board[i][j - 1].colour and
                         jewel.colour == self.game_board[i][j + 1].colour
                         ):
+                        jewel.vertical_triple.append((i, j))
                         jewel.horizontal_triple.append((i, j - 1))
                         jewel.horizontal_triple.append((i, j + 1))
                         self.score += 1
@@ -225,22 +233,45 @@ class Engine():
         self.first_pos = self.second_pos = (-1, -1)
 
     def clear_matched(self):
+        jewel_fade = []
         for i, row in enumerate(self.game_board):
             for j, jewel in enumerate(row):
                 if len(jewel.horizontal_triple) > 0:
-                    self.game_board[i][j].colour = 0
-                    self.game_board[i][j].make_image()
                     for cell in jewel.horizontal_triple:
-                        x, y = cell
-                        self.game_board[x][y].colour = 0
-                        self.game_board[x][y].make_image()
+                        if cell not in jewel_fade:
+                            jewel_fade.append(cell)
                 if len(jewel.vertical_triple) > 0:
-                    self.game_board[i][j].colour = 0
-                    self.game_board[i][j].make_image()
                     for cell in jewel.vertical_triple:
-                        x, y = cell
-                        self.game_board[x][y].colour = 0
-                        self.game_board[x][y].make_image()
+                        if cell not in jewel_fade:
+                            jewel_fade.append(cell)
+        if len(jewel_fade) > 0:
+            self.fade(jewel_fade)
+
+    def fade(self, jewels_to_fade):
+        jewel_colours = [COLOURS[self.game_board[cell[0]][cell[1]].colour] for cell in jewels_to_fade]
+        #input(jewel_colours)
+        for _ in range(51):
+            for colour_index, cell in enumerate(jewels_to_fade):
+                x, y = cell
+                r, g, b  = jewel_colours[colour_index]
+                if r > 4:
+                    r -= 5
+                else:
+                    r = 0
+                if g > 4:
+                    g -= 5
+                else:
+                    g = 0
+                if b > 4:
+                    b -= 5
+                else:
+                    b = 0
+                self.game_board[x][y].fade_image((r, g, b))
+                jewel_colours[colour_index] = (r, g, b)
+            self.draw_board()
+            pygame.time.Clock().tick(60)
+        for cell in jewels_to_fade:
+            self.game_board[cell[0]][cell[1]].colour = 0 
 
     def draw_board(self):
         self.game_window.fill(COLOURS[0])
